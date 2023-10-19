@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Me Page</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .category-heading {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-group">
+            <label for="price">Selling Price:</label>
+            <input type="number" id="price">
+        </div>
+        <div class="form-group">
+            <label for="product">Product Name:</label>
+            <input type="text" id="product">
+        </div>
+        <div class="form-group">
+            <label for="category">Choose a Category:</label>
+            <select id="category">
+                <option value="selrct">Select</option>
+                <option value="food">Food</option>
+                <option value="clothing">Clothing</option>
+                <option value="electronics">Electronics</option>
+            </select>
+        </div>
+        <button onclick="addProduct()">Add Product</button>
+
+        <div class="category-list">
+            <h2>Products</h2>
+            <div class="category" id="food">
+                <p class="category-heading">Food Items</p>
+                <ul id="food-list"></ul>
+            </div>
+            <div class="category" id="clothing">
+                <p class="category-heading">Clothing Items</p>
+                <ul id="clothing-list"></ul>
+            </div>
+            <div class="category" id="electronics">
+                <p class="category-heading">Electronics Items</p>
+                <ul id="electronics-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        if (localStorage.getItem('productData')) {
+            const savedData = JSON.parse(localStorage.getItem('productData'));
+
+            for (const category in savedData) {
+                const categoryList = document.getElementById(`${category}-list`);
+                savedData[category].forEach(productData => {
+                    const productItem = document.createElement("li");
+                    productItem.innerHTML = `${productData.product} - ${productData.price} - ${productData.category} <button onclick="deleteProduct(this)">Delete Order</button>`;
+                    categoryList.appendChild(productItem);
+                });
+            }
+        }
+
+        function saveDataToStorage() {
+            const productData = {};
+
+            const categories = ["food", "clothing", "electronics"];
+            for (const category of categories) {
+                productData[category] = [];
+
+                const categoryList = document.getElementById(`${category}-list`);
+                const products = categoryList.getElementsByTagName("li");
+
+                for (const product of products) {
+                    const parts = product.textContent.split(" - ");
+                    const productName = parts[0];
+                    const productPrice = parts[1];
+                    const productCategory = parts[2];
+
+                    productData[category].push({ product: productName, price: productPrice, category: productCategory });
+                }
+            }
+
+            localStorage.setItem('productData', JSON.stringify(productData));
+        }
+
+        function addProduct() {
+            const product = document.getElementById("product").value;
+            const price = document.getElementById("price").value;
+            const category = document.getElementById("category").value;
+
+            if (product && price) {
+                const productItem = document.createElement("li");
+                productItem.innerHTML = `${product} - ${price} - ${category} <button onclick="deleteProduct(this)">Delete Order</button>`;
+                document.getElementById(`${category}-list`).appendChild(productItem);
+
+                // Clear the input fields
+                document.getElementById("product").value = "";
+                document.getElementById("price").value = "";
+                document.getElementById('category').value = "";
+                // Save the data to local storage
+                saveDataToStorage();
+            }
+        }
+
+        function deleteProduct(button) {
+            const listItem = button.parentElement;
+            listItem.remove();
+
+            // Save the data to local storage after deletion
+            saveDataToStorage();
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</body>
+</html>
